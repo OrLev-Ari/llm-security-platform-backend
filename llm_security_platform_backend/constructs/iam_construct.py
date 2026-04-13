@@ -10,6 +10,7 @@ class IAMConstruct(Construct):
         # EC2 Role with full SQS and DynamoDB permissions
         self.ec2_llm_platform_security_role = iam.Role(
             self, "EC2LLMPlatformSecurityRole",
+            role_name="EC2LLMPlatformSecurityRole",
             assumed_by=iam.ServicePrincipal("ec2.amazonaws.com")
         )
         self.ec2_llm_platform_security_role.add_to_policy(iam.PolicyStatement(
@@ -28,6 +29,7 @@ class IAMConstruct(Construct):
         # Lambda execution roles for each Lambda function
         self.create_challenge_lambda_role = iam.Role(
             self, "CreateChallengeLambdaRole",
+            role_name="CreateChallengeLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
@@ -39,6 +41,7 @@ class IAMConstruct(Construct):
         ))
         self.start_challenge_lambda_role = iam.Role(
             self, "StartChallengeLambdaRole",
+            role_name="StartChallengeLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
@@ -54,6 +57,7 @@ class IAMConstruct(Construct):
         ))
         self.delete_challenge_lambda_role = iam.Role(
             self, "DeleteChallengeLambdaRole",
+            role_name="DeleteChallengeLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
@@ -65,6 +69,7 @@ class IAMConstruct(Construct):
         ))
         self.get_owner_challenge_lambda_role = iam.Role(
             self, "GetOwnerChallengeLambdaRole",
+            role_name="GetOwnerChallengeLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
@@ -76,6 +81,7 @@ class IAMConstruct(Construct):
         ))
         self.get_challenge_lambda_role = iam.Role(
             self, "GetChallengeLambdaRole",
+            role_name="GetChallengeLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
@@ -87,6 +93,7 @@ class IAMConstruct(Construct):
         ))
         self.list_owner_challenges_lambda_role = iam.Role(
             self, "ListOwnerChallengesLambdaRole",
+            role_name="ListOwnerChallengesLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
@@ -98,6 +105,7 @@ class IAMConstruct(Construct):
         ))
         self.list_user_successful_challenges_lambda_role = iam.Role(
             self, "ListUserSuccessfulChallengesLambdaRole",
+            role_name="ListUserSuccessfulChallengesLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
@@ -112,6 +120,7 @@ class IAMConstruct(Construct):
         ))
         self.list_challenges_lambda_role = iam.Role(
             self, "ListChallengesLambdaRole",
+            role_name="ListChallengesLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
@@ -123,6 +132,7 @@ class IAMConstruct(Construct):
         ))
         self.poll_for_responses_lambda_role = iam.Role(
             self, "PollForResponsesLambdaRole",
+            role_name="PollForResponsesLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
@@ -134,6 +144,7 @@ class IAMConstruct(Construct):
         ))
         self.send_message_to_queue_lambda_role = iam.Role(
             self, "SendMessageToQueueLambdaRole",
+            role_name="SendMessageToQueueLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
@@ -153,6 +164,7 @@ class IAMConstruct(Construct):
         ))
         self.update_challenge_lambda_role = iam.Role(
             self, "UpdateChallengeLambdaRole",
+            role_name="UpdateChallengeLambdaRole",
             assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")

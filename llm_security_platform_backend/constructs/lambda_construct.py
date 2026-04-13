@@ -9,6 +9,7 @@ class LambdaConstruct(Construct):
         # CreateChallengeLambdaFunction
         self.create_challenge_lambda = _lambda.Function(
             self, "CreateChallengeLambdaFunction",
+            function_name="CreateChallengeLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="create_challenge.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
@@ -24,6 +25,7 @@ class LambdaConstruct(Construct):
         # StartChallengeLambdaFunction
         self.start_challenge_lambda = _lambda.Function(
             self, "StartChallengeLambdaFunction",
+            function_name="StartChallengeLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="start_challenge.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
@@ -40,6 +42,7 @@ class LambdaConstruct(Construct):
         # DeleteChallengeLambdaFunction
         self.delete_challenge_lambda = _lambda.Function(
             self, "DeleteChallengeLambdaFunction",
+            function_name="DeleteChallengeLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="delete_challenge.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
@@ -55,6 +58,7 @@ class LambdaConstruct(Construct):
         # GetOwnerChallengeLambdaFunction
         self.get_owner_challenge_lambda = _lambda.Function(
             self, "GetOwnerChallengeLambdaFunction",
+            function_name="GetOwnerChallengeLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="get_owner_challenge.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
@@ -70,6 +74,7 @@ class LambdaConstruct(Construct):
         # GetChallengeLambdaFunction
         self.get_challenge_lambda = _lambda.Function(
             self, "GetChallengeLambdaFunction",
+            function_name="GetChallengeLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="get_challenge.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
@@ -85,6 +90,7 @@ class LambdaConstruct(Construct):
         # ListOwnerChallengesLambdaFunction
         self.list_owner_challenges_lambda = _lambda.Function(
             self, "ListOwnerChallengesLambdaFunction",
+            function_name="ListOwnerChallengesLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="list_owner_challenges.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
@@ -100,6 +106,7 @@ class LambdaConstruct(Construct):
         # ListUserSuccessfulChallengesLambdaFunction
         self.list_user_successful_challenges_lambda = _lambda.Function(
             self, "ListUserSuccessfulChallengesLambdaFunction",
+            function_name="ListUserSuccessfulChallengesLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="list_user_successful_challenges.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
@@ -115,6 +122,7 @@ class LambdaConstruct(Construct):
         # ListChallengesLambdaFunction
         self.list_challenges_lambda = _lambda.Function(
             self, "ListChallengesLambdaFunction",
+            function_name="ListChallengesLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="list_challenges.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
@@ -130,6 +138,7 @@ class LambdaConstruct(Construct):
         # PollForResponsesLambdaFunction
         self.poll_for_responses_lambda = _lambda.Function(
             self, "PollForResponsesLambdaFunction",
+            function_name="PollForResponsesLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="poll_for_responses.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
@@ -145,6 +154,7 @@ class LambdaConstruct(Construct):
         # SendMessageToLlmSecurityPlatformQueueLambdaFunction
         self.send_message_to_queue_lambda = _lambda.Function(
             self, "SendMessageToQueueLambdaFunction",
+            function_name="SendMessageToQueueLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="send_message_to_queue.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
@@ -162,6 +172,7 @@ class LambdaConstruct(Construct):
         # UpdateChallengeLambdaFunction
         self.update_challenge_lambda = _lambda.Function(
             self, "UpdateChallengeLambdaFunction",
+            function_name="UpdateChallengeLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_12,
             handler="update_challenge.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
