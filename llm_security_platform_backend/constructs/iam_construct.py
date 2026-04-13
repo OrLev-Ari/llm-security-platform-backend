@@ -1,0 +1,171 @@
+from aws_cdk import aws_iam as iam
+from constructs import Construct
+
+
+
+class IAMConstruct(Construct):
+    def __init__(self, scope: Construct, id: str):
+        super().__init__(scope, id)
+
+        # EC2 Role with full SQS and DynamoDB permissions
+        self.ec2_llm_platform_security_role = iam.Role(
+            self, "EC2LLMPlatformSecurityRole",
+            assumed_by=iam.ServicePrincipal("ec2.amazonaws.com")
+        )
+        self.ec2_llm_platform_security_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:*"],
+            resources=[
+                "arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable",
+                "arn:aws:dynamodb:us-east-1:957592003036:table/PromptsTable",
+                "arn:aws:dynamodb:us-east-1:957592003036:table/ChallengeSessionsTable"
+            ]
+        ))
+        self.ec2_llm_platform_security_role.add_to_policy(iam.PolicyStatement(
+            actions=["sqs:*"],
+            resources=["arn:aws:sqs:us-east-1:957592003036:LLmSecurityPlatformMessageQueue"]
+        ))
+
+        # IAM User for CLI access
+        self.user = iam.User(
+            self, "LLMPlatformSecurityDevUser",
+            user_name="llmplatformsecuritydev"
+        )
+        self.user.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AdministratorAccess"))
+
+        # Lambda execution roles for each Lambda function
+        self.create_challenge_lambda_role = iam.Role(
+            self, "CreateChallengeLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.create_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:PutItem"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+        ))
+        self.start_challenge_lambda_role = iam.Role(
+            self, "StartChallengeLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.start_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:GetItem"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+        ))
+        self.start_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:PutItem"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengeSessionsTable"]
+        ))
+        self.delete_challenge_lambda_role = iam.Role(
+            self, "DeleteChallengeLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.delete_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:DeleteItem"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+        ))
+        self.get_owner_challenge_lambda_role = iam.Role(
+            self, "GetOwnerChallengeLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.get_owner_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:GetItem"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+        ))
+        self.get_challenge_lambda_role = iam.Role(
+            self, "GetChallengeLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.get_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:GetItem"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+        ))
+        self.list_owner_challenges_lambda_role = iam.Role(
+            self, "ListOwnerChallengesLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.list_owner_challenges_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:Scan"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+        ))
+        self.list_user_successful_challenges_lambda_role = iam.Role(
+            self, "ListUserSuccessfulChallengesLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.list_user_successful_challenges_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:Query"],
+            resources=[
+                "arn:aws:dynamodb:us-east-1:957592003036:table/ChallengeSessionsTable",
+                "arn:aws:dynamodb:us-east-1:957592003036:table/ChallengeSessionsTable/index/UserIdIndex"
+            ]
+        ))
+        self.list_challenges_lambda_role = iam.Role(
+            self, "ListChallengesLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.list_challenges_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:Scan"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+        ))
+        self.poll_for_responses_lambda_role = iam.Role(
+            self, "PollForResponsesLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.poll_for_responses_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:Query", "dynamodb:UpdateItem"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/PromptsTable"]
+        ))
+        self.send_message_to_queue_lambda_role = iam.Role(
+            self, "SendMessageToQueueLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.send_message_to_queue_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:GetItem"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengeSessionsTable"]
+        ))
+        self.send_message_to_queue_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:PutItem"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/PromptsTable"]
+        ))
+        self.send_message_to_queue_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["sqs:SendMessage"],
+            resources=["arn:aws:sqs:us-east-1:957592003036:LLmSecurityPlatformMessageQueue"]
+        ))
+        self.update_challenge_lambda_role = iam.Role(
+            self, "UpdateChallengeLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.update_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:UpdateItem"],
+            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+        ))
