@@ -25,13 +25,6 @@ class IAMConstruct(Construct):
             resources=["arn:aws:sqs:us-east-1:957592003036:LLmSecurityPlatformMessageQueue"]
         ))
 
-        # IAM User for CLI access
-        self.user = iam.User(
-            self, "LLMPlatformSecurityDevUser",
-            user_name="llmplatformsecuritydev"
-        )
-        self.user.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AdministratorAccess"))
-
         # Lambda execution roles for each Lambda function
         self.create_challenge_lambda_role = iam.Role(
             self, "CreateChallengeLambdaRole",
