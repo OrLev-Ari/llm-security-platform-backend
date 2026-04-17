@@ -12,6 +12,12 @@ class IAMConstruct(Construct):
             resources=["arn:aws:ssm:us-east-1:957592003036:parameter/llmplatformsecurity/jwtsecret"]
         )
 
+        # SSM Parameter Store policy for Hugging Face token access
+        self.ssm_hf_token_policy = iam.PolicyStatement(
+            actions=["ssm:GetParameter"],
+            resources=["arn:aws:ssm:us-east-1:957592003036:parameter/llmplatformsecurity/hftoken"]
+        )
+
         # EC2 Role with full SQS and DynamoDB permissions
         self.ec2_llm_platform_security_role = iam.Role(
             self, "EC2LLMPlatformSecurityRole",
@@ -30,6 +36,8 @@ class IAMConstruct(Construct):
             actions=["sqs:*"],
             resources=["arn:aws:sqs:us-east-1:957592003036:LLmSecurityPlatformMessageQueue"]
         ))
+        # Add SSM parameter access for Hugging Face token
+        self.ec2_llm_platform_security_role.add_to_policy(self.ssm_hf_token_policy)
 
         # Lambda execution roles for each Lambda function
         self.create_challenge_lambda_role = iam.Role(

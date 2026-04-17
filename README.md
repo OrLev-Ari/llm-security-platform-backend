@@ -66,10 +66,11 @@ The Lambda functions use a layer for authentication dependencies (`bcrypt`, `PyJ
 1. Edit `lambda_layer/requirements.txt`
 2. Run `cdk deploy` (CDK will rebuild the layer automatically)
 
-### 2. Create JWT Secret in SSM Parameter Store
+### 2. Create Required SSM Parameters
 
-The authentication system requires a JWT secret stored in AWS Systems Manager Parameter Store:
+The application requires the following parameters in AWS Systems Manager Parameter Store:
 
+#### JWT Secret (Required)
 ```bash
 aws ssm put-parameter \
   --name /llmplatformsecurity/jwtsecret \
@@ -83,6 +84,20 @@ aws ssm put-parameter \
 import secrets
 print(secrets.token_urlsafe(32))
 ```
+
+#### Hugging Face Token (Required)
+```bash
+aws ssm put-parameter \
+  --name /llmplatformsecurity/hftoken \
+  --value "hf_your_huggingface_token_here" \
+  --type SecureString \
+  --region us-east-1
+```
+
+**Get your Hugging Face token:**
+1. Sign up at https://huggingface.co/
+2. Go to Settings → Access Tokens
+3. Create a new token with read permissions
 
 ## Admin User Setup
 
