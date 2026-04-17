@@ -49,23 +49,52 @@ command.
 
 ## Deployment Prerequisites
 
-### AWS Account Configuration
+### 0. Configure AWS CLI
 
-The CDK stack automatically uses your AWS CLI configured account and region. No hardcoded account IDs!
+**IMPORTANT:** You must configure your AWS CLI credentials before deploying this project.
 
-**To check your configured AWS account:**
+**Install AWS CLI:**
+- Download from: https://aws.amazon.com/cli/
+- Or via package manager:
+  - Windows: `winget install Amazon.AWSCLI`
+  - macOS: `brew install awscli`
+  - Linux: `sudo apt install awscli` or `sudo yum install awscli`
+
+**Configure AWS Credentials:**
+```bash
+aws configure
+```
+
+You'll be prompted to enter:
+- AWS Access Key ID
+- AWS Secret Access Key
+- Default region name (e.g., `us-east-1`)
+- Default output format (press Enter for default)
+
+**Get AWS credentials:**
+1. Log in to AWS Console
+2. Go to IAM → Users → Your User → Security Credentials
+3. Create Access Key → Command Line Interface (CLI)
+4. Copy the Access Key ID and Secret Access Key
+
+**Verify your configuration:**
 ```bash
 aws sts get-caller-identity
 ```
 
-**To set your default region (if not already set):**
+This should display your account ID, user ARN, and user ID. The CDK stack will deploy to this account automatically.
+
+### 1. Bootstrap AWS CDK (First Time Only)
+
+If this is your first time using AWS CDK in your account/region, you must bootstrap it:
+
 ```bash
-aws configure set region us-east-1
+cdk bootstrap
 ```
 
-The stack will deploy to whatever account/region your AWS CLI is configured for.
+This creates the necessary S3 buckets and IAM roles for CDK deployments. You only need to do this once per account/region combination.
 
-### 1. Lambda Layer Dependencies
+### 2. Lambda Layer Dependencies
 
 The Lambda functions use a layer for authentication dependencies (`bcrypt`, `PyJWT`). The layer is **automatically built during CDK synthesis** using Docker bundling - no manual steps required!
 
@@ -82,9 +111,11 @@ The Lambda functions use a layer for authentication dependencies (`bcrypt`, `PyJ
 1. Edit `lambda_layer/requirements.txt`
 2. Run `cdk deploy` (CDK will rebuild the layer automatically)
 
-### 2. Create Required SSM Parameters
+### 3. Create Required SSM Parameters
 
 The application requires the following parameters in AWS Systems Manager Parameter Store:
+
+**Important:** These parameters must be created in the **same region** where you're deploying the stack.
 
 #### JWT Secret (Required)
 ```bash
