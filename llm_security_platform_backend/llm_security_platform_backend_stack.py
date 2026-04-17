@@ -26,7 +26,8 @@ class LlmSecurityPlatformBackendStack(Stack):
             dynamodb_tables={
                 "challenge_sessions_table": dynamodb_construct.challenge_sessions_table,
                 "prompts_table": dynamodb_construct.prompts_table,
-                "challenges_table": dynamodb_construct.challenges_table
+                "challenges_table": dynamodb_construct.challenges_table,
+                "users_table": dynamodb_construct.users_table
             },
             iam_roles={
                 "create_challenge_lambda_role": iam_construct.create_challenge_lambda_role,
@@ -39,7 +40,9 @@ class LlmSecurityPlatformBackendStack(Stack):
                 "list_challenges_lambda_role": iam_construct.list_challenges_lambda_role,
                 "poll_for_responses_lambda_role": iam_construct.poll_for_responses_lambda_role,
                 "send_message_to_queue_lambda_role": iam_construct.send_message_to_queue_lambda_role,
-                "update_challenge_lambda_role": iam_construct.update_challenge_lambda_role
+                "update_challenge_lambda_role": iam_construct.update_challenge_lambda_role,
+                "register_lambda_role": iam_construct.register_lambda_role,
+                "login_lambda_role": iam_construct.login_lambda_role
             }
         )
 
@@ -58,6 +61,8 @@ class LlmSecurityPlatformBackendStack(Stack):
                 "list_challenges_lambda": lambda_construct.list_challenges_lambda,
                 "poll_for_responses_lambda": lambda_construct.poll_for_responses_lambda,
                 "send_message_to_queue_lambda": lambda_construct.send_message_to_queue_lambda,
-                "update_challenge_lambda": lambda_construct.update_challenge_lambda
+                "update_challenge_lambda": lambda_construct.update_challenge_lambda,
+                "register_lambda": lambda_construct.register_lambda,
+                "login_lambda": lambda_construct.login_lambda
             }
         )

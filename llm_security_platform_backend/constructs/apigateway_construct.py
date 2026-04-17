@@ -13,6 +13,21 @@ class ApiGatewayConstruct(Construct):
             deploy_options=apigateway.StageOptions(stage_name="prod")
         )
 
+        # /auth
+        auth_resource = self.api.root.add_resource("auth")
+        
+        # /auth/register
+        auth_resource.add_resource("register").add_method(
+            "POST",
+            apigateway.LambdaIntegration(lambda_functions["register_lambda"])
+        )
+        
+        # /auth/login
+        auth_resource.add_resource("login").add_method(
+            "POST",
+            apigateway.LambdaIntegration(lambda_functions["login_lambda"])
+        )
+
 
 
         # /admin
@@ -22,53 +37,62 @@ class ApiGatewayConstruct(Construct):
         admin_challenges_resource = admin_resource.add_resource("challenges")
         admin_challenges_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(lambda_functions["list_owner_challenges_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["list_owner_challenges_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )
         admin_challenges_resource.add_method(
             "POST",
-            apigateway.LambdaIntegration(lambda_functions["create_challenge_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["create_challenge_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )
 
         # /admin/challenges/{challenge_id}
         admin_challenge_id_resource = admin_challenges_resource.add_resource("{challenge_id}")
         admin_challenge_id_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(lambda_functions["get_owner_challenge_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["get_owner_challenge_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )
         admin_challenge_id_resource.add_method(
             "DELETE",
-            apigateway.LambdaIntegration(lambda_functions["delete_challenge_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["delete_challenge_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )
         admin_challenge_id_resource.add_method(
             "PUT",
-            apigateway.LambdaIntegration(lambda_functions["update_challenge_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["update_challenge_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )
 
         # /challenges
         challenges_resource = self.api.root.add_resource("challenges")
         challenges_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(lambda_functions["list_challenges_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["list_challenges_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )
 
         # /challenges/completedchallenges
         completed_challenges_resource = challenges_resource.add_resource("completedchallenges")
         completed_challenges_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(lambda_functions["list_user_successful_challenges_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["list_user_successful_challenges_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )
 
         # /challenges/{challenge_id}
         challenge_id_resource = challenges_resource.add_resource("{challenge_id}")
         challenge_id_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(lambda_functions["get_challenge_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["get_challenge_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )
 
         # /challenges/{challenge_id}/start
         challenge_id_resource.add_resource("start").add_method(
             "POST",
-            apigateway.LambdaIntegration(lambda_functions["start_challenge_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["start_challenge_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )
 
         # /sessions
@@ -77,10 +101,12 @@ class ApiGatewayConstruct(Construct):
         session_id_resource = sessions_resource.add_resource("{session_id}")
         session_id_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(lambda_functions["poll_for_responses_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["poll_for_responses_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )
         # /sessions/{session_id}/messages
         session_id_resource.add_resource("messages").add_method(
             "POST",
-            apigateway.LambdaIntegration(lambda_functions["send_message_to_queue_lambda"])
+            apigateway.LambdaIntegration(lambda_functions["send_message_to_queue_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
         )

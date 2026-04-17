@@ -4,6 +4,7 @@ import os
 import logging
 from datetime import datetime
 import uuid
+from auth_utils import get_jwt_secret, extract_token_from_event, validate_jwt
 
 # DynamoDB setup
 dynamo = boto3.resource("dynamodb")
@@ -17,19 +18,26 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
+    # Authenticate user
     try:
-        try:
-            # ------------------ Extract user info from Cognito JWT ------------------
-            claims = event["requestContext"]["authorizer"]["claims"]
-            user_id = claims.get("sub")
-            if not user_id:
-                return {"statusCode": 403, "body": json.dumps({"error": "Unauthorized"})}
-        except:
-            user_id = "randomly because no auth yet"
+        jwt_secret = get_jwt_secret()
+        token = extract_token_from_event(event)
+        username, is_admin = validate_jwt(token, jwt_secret)
+    except Exception as e:
+        logger.warning(f"Authentication failed: {str(e)}")
+        return {
+            "statusCode": 401,
+            "body": json.dumps({"error": str(e)})
+        }
+    
+    try:
+        # Use username from JWT as user_id
+        user_id = username
 
         # ------------------ Extract challenge_id from path ------------------
         challenge_id = event["pathParameters"].get("challenge_id")
         if not challenge_id:
+            logger.warning("Start challenge request missing challenge_id")
             return {"statusCode": 400, "body": json.dumps({"error": "Missing challenge_id"})}
 
         logger.info(f"User {user_id} starting challenge {challenge_id}")
@@ -38,6 +46,7 @@ def lambda_handler(event, context):
         resp = challenges_table.get_item(Key={"challenge_id": challenge_id})
         challenge = resp.get("Item")
         if not challenge:
+            logger.warning(f"Challenge not found: {challenge_id}")
             return {"statusCode": 404, "body": json.dumps({"error": "Challenge not found"})}
 
         # Only return title + description to client
@@ -50,6 +59,7 @@ def lambda_handler(event, context):
         session_id = str(uuid.uuid4())
         now = datetime.utcnow().isoformat()
 
+        logger.info(f"Creating new session {session_id} for user {user_id} and challenge {challenge_id}")
         sessions_table.put_item(
             Item={
                 "session_id": session_id,
@@ -61,7 +71,7 @@ def lambda_handler(event, context):
             }
         )
 
-        logger.info(f"Created session {session_id} for user {user_id} and challenge {challenge_id}")
+        logger.info(f"Session created successfully: {session_id}")
 
         # ------------------ Return session info ------------------
         return {

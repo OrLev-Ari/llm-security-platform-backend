@@ -35,3 +35,13 @@ class DynamoDBConstruct(Construct):
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             table_name="ChallengesTable"
         )
+
+        # UsersTable
+        # Note: Admin users must be created manually via DynamoDB console
+        # Set is_admin=True for admin accounts during manual insertion
+        self.users_table = dynamodb.Table(
+            self, "UsersTable",
+            partition_key=dynamodb.Attribute(name="username", type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            table_name="UsersTable"
+        )

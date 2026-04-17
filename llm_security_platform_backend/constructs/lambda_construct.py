@@ -6,6 +6,24 @@ class LambdaConstruct(Construct):
     def __init__(self, scope: Construct, id: str, dynamodb_tables: dict, iam_roles: dict):
         super().__init__(scope, id)
 
+        # Lambda Layer for authentication dependencies with automatic bundling
+        self.auth_layer = _lambda.LayerVersion(
+            self, "AuthDependenciesLayer",
+            code=_lambda.Code.from_asset(
+                "lambda_layer",
+                bundling={
+                    "image": _lambda.Runtime.PYTHON_3_12.bundling_image,
+                    "command": [
+                        "bash", "-c",
+                        "pip install -r requirements.txt -t /asset-output/python --platform manylinux2014_aarch64 --only-binary=:all: --python-version 3.12 --implementation cp && cp requirements.txt /asset-output/"
+                    ],
+                },
+            ),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_12],
+            compatible_architectures=[_lambda.Architecture.ARM_64],
+            description="Authentication dependencies: bcrypt, PyJWT"
+        )
+
         # CreateChallengeLambdaFunction
         self.create_challenge_lambda = _lambda.Function(
             self, "CreateChallengeLambdaFunction",
@@ -19,7 +37,8 @@ class LambdaConstruct(Construct):
             role=iam_roles["create_challenge_lambda_role"],
             memory_size=128,
             timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )
 
         # StartChallengeLambdaFunction
@@ -36,7 +55,8 @@ class LambdaConstruct(Construct):
             role=iam_roles["start_challenge_lambda_role"],
             memory_size=128,
             timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )
 
         # DeleteChallengeLambdaFunction
@@ -52,7 +72,8 @@ class LambdaConstruct(Construct):
             role=iam_roles["delete_challenge_lambda_role"],
             memory_size=128,
             timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )
 
         # GetOwnerChallengeLambdaFunction
@@ -68,7 +89,8 @@ class LambdaConstruct(Construct):
             role=iam_roles["get_owner_challenge_lambda_role"],
             memory_size=128,
             timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )
 
         # GetChallengeLambdaFunction
@@ -84,7 +106,8 @@ class LambdaConstruct(Construct):
             role=iam_roles["get_challenge_lambda_role"],
             memory_size=128,
             timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )
 
         # ListOwnerChallengesLambdaFunction
@@ -100,7 +123,8 @@ class LambdaConstruct(Construct):
             role=iam_roles["list_owner_challenges_lambda_role"],
             memory_size=128,
             timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )
 
         # ListUserSuccessfulChallengesLambdaFunction
@@ -116,7 +140,8 @@ class LambdaConstruct(Construct):
             role=iam_roles["list_user_successful_challenges_lambda_role"],
             memory_size=128,
             timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )
 
         # ListChallengesLambdaFunction
@@ -132,7 +157,8 @@ class LambdaConstruct(Construct):
             role=iam_roles["list_challenges_lambda_role"],
             memory_size=128,
             timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )
 
         # PollForResponsesLambdaFunction
@@ -148,7 +174,8 @@ class LambdaConstruct(Construct):
             role=iam_roles["poll_for_responses_lambda_role"],
             memory_size=128,
             timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )
 
         # SendMessageToLlmSecurityPlatformQueueLambdaFunction
@@ -164,9 +191,10 @@ class LambdaConstruct(Construct):
                 "CHALLENGE_SESSIONS_TABLE": dynamodb_tables["challenge_sessions_table"].table_name
             },
             role=iam_roles["send_message_to_queue_lambda_role"],
-            memory_size=128,
-            timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            memory_size=256,
+            timeout=Duration.seconds(30),
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )
 
         # UpdateChallengeLambdaFunction
@@ -182,5 +210,40 @@ class LambdaConstruct(Construct):
             role=iam_roles["update_challenge_lambda_role"],
             memory_size=128,
             timeout=Duration.seconds(15),
-            architecture=_lambda.Architecture.ARM_64
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
+        )
+
+        # RegisterLambdaFunction
+        self.register_lambda = _lambda.Function(
+            self, "RegisterLambdaFunction",
+            function_name="RegisterLambdaFunction",
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="register.lambda_handler",
+            code=_lambda.Code.from_asset("lambda_handlers"),
+            environment={
+                "USERS_TABLE": dynamodb_tables["users_table"].table_name
+            },
+            role=iam_roles["register_lambda_role"],
+            memory_size=128,
+            timeout=Duration.seconds(15),
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
+        )
+
+        # LoginLambdaFunction
+        self.login_lambda = _lambda.Function(
+            self, "LoginLambdaFunction",
+            function_name="LoginLambdaFunction",
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="login.lambda_handler",
+            code=_lambda.Code.from_asset("lambda_handlers"),
+            environment={
+                "USERS_TABLE": dynamodb_tables["users_table"].table_name
+            },
+            role=iam_roles["login_lambda_role"],
+            memory_size=128,
+            timeout=Duration.seconds(15),
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
         )

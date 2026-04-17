@@ -3,6 +3,7 @@ import boto3
 import os
 import logging
 from boto3.dynamodb.conditions import Key
+from auth_utils import get_jwt_secret, extract_token_from_event, validate_jwt
 
 # DynamoDB setup
 dynamo = boto3.resource("dynamodb")
@@ -13,16 +14,24 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
+    logger.info("List user successful challenges request received")
+    # Authenticate user
     try:
-        try:
-            # ------------------ Extract user info from Cognito JWT ------------------
-            claims = event["requestContext"]["authorizer"]["claims"]
-            user_id = claims.get("sub")
-            if not user_id:
-                return {"statusCode": 403, "body": json.dumps({"error": "Unauthorized"})}
-        except:
-            user_id = "randomly because no auth yet"
-        logger.info(f"Listing sessions for user {user_id}")
+        jwt_secret = get_jwt_secret()
+        token = extract_token_from_event(event)
+        username, is_admin = validate_jwt(token, jwt_secret)
+        logger.info(f"Authenticated user: {username}")
+    except Exception as e:
+        logger.warning(f"Authentication failed: {str(e)}")
+        return {
+            "statusCode": 401,
+            "body": json.dumps({"error": str(e)})
+        }
+    
+    try:
+        # Use username from JWT as user_id
+        user_id = username
+        logger.info(f"Querying sessions for user: {user_id}")
 
         # ------------------ Query GSI on user_id with started_at sort ------------------
         response = challenge_sessions_table.query(
@@ -31,6 +40,7 @@ def lambda_handler(event, context):
             ScanIndexForward=False  # latest sessions first
         )
         items = response.get("Items", [])
+        logger.info(f"Retrieved {len(items)} sessions for user {user_id}")
 
         # ------------------ Prepare response ------------------
         completed_challenge_ids = {
@@ -40,6 +50,7 @@ def lambda_handler(event, context):
         }
 
         completed_challenges_ids = list(completed_challenge_ids)
+        logger.info(f"User {user_id} has completed {len(completed_challenges_ids)} challenges")
         return {
             "statusCode": 200,
             "body": json.dumps({"completed challenges": completed_challenges_ids})
