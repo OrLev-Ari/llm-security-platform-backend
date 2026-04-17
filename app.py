@@ -8,7 +8,10 @@ from llm_security_platform_backend.llm_security_platform_backend_stack import Ll
 
 app = cdk.App()
 LlmSecurityPlatformBackendStack(app, "LlmSecurityPlatformBackendStack",
-    env=cdk.Environment(account='957592003036', region='us-east-1'),
+    env=cdk.Environment(
+        account=os.environ.get('CDK_DEFAULT_ACCOUNT'),
+        region=os.environ.get('CDK_DEFAULT_REGION', 'us-east-1')
+    ),
     )
 
 app.synth()

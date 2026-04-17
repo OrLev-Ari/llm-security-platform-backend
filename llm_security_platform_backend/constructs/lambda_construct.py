@@ -1,10 +1,12 @@
-from aws_cdk import aws_lambda as _lambda
+from aws_cdk import aws_lambda as _lambda, Stack
 from constructs import Construct
 from aws_cdk import Duration
 
 class LambdaConstruct(Construct):
     def __init__(self, scope: Construct, id: str, dynamodb_tables: dict, iam_roles: dict):
         super().__init__(scope, id)
+        account = Stack.of(self).account
+        region = Stack.of(self).region
 
         # Lambda Layer for authentication dependencies with automatic bundling
         self.auth_layer = _lambda.LayerVersion(
@@ -186,7 +188,7 @@ class LambdaConstruct(Construct):
             handler="send_message_to_queue.lambda_handler",
             code=_lambda.Code.from_asset("lambda_handlers"),
             environment={
-                "SQS_QUEUE_URL": "https://sqs.us-east-1.amazonaws.com/957592003036/LLmSecurityPlatformMessageQueue",
+                "SQS_QUEUE_URL": f"https://sqs.{region}.amazonaws.com/{account}/LLmSecurityPlatformMessageQueue",
                 "PROMPTS_TABLE": dynamodb_tables["prompts_table"].table_name,
                 "CHALLENGE_SESSIONS_TABLE": dynamodb_tables["challenge_sessions_table"].table_name
             },

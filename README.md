@@ -49,6 +49,22 @@ command.
 
 ## Deployment Prerequisites
 
+### AWS Account Configuration
+
+The CDK stack automatically uses your AWS CLI configured account and region. No hardcoded account IDs!
+
+**To check your configured AWS account:**
+```bash
+aws sts get-caller-identity
+```
+
+**To set your default region (if not already set):**
+```bash
+aws configure set region us-east-1
+```
+
+The stack will deploy to whatever account/region your AWS CLI is configured for.
+
 ### 1. Lambda Layer Dependencies
 
 The Lambda functions use a layer for authentication dependencies (`bcrypt`, `PyJWT`). The layer is **automatically built during CDK synthesis** using Docker bundling - no manual steps required!

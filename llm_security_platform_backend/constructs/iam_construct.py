@@ -1,4 +1,4 @@
-from aws_cdk import aws_iam as iam
+from aws_cdk import aws_iam as iam, Stack
 from constructs import Construct
 
 
@@ -6,16 +6,20 @@ class IAMConstruct(Construct):
     def __init__(self, scope: Construct, id: str):
         super().__init__(scope, id)
 
+        # Get account and region from stack context
+        account = Stack.of(self).account
+        region = Stack.of(self).region
+
         # SSM Parameter Store policy for JWT secret access
         self.ssm_jwt_secret_policy = iam.PolicyStatement(
             actions=["ssm:GetParameter"],
-            resources=["arn:aws:ssm:us-east-1:957592003036:parameter/llmplatformsecurity/jwtsecret"]
+            resources=[f"arn:aws:ssm:{region}:{account}:parameter/llmplatformsecurity/jwtsecret"]
         )
 
         # SSM Parameter Store policy for Hugging Face token access
         self.ssm_hf_token_policy = iam.PolicyStatement(
             actions=["ssm:GetParameter"],
-            resources=["arn:aws:ssm:us-east-1:957592003036:parameter/llmplatformsecurity/hftoken"]
+            resources=[f"arn:aws:ssm:{region}:{account}:parameter/llmplatformsecurity/hftoken"]
         )
 
         # EC2 Role with full SQS and DynamoDB permissions
@@ -27,14 +31,14 @@ class IAMConstruct(Construct):
         self.ec2_llm_platform_security_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:*"],
             resources=[
-                "arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable",
-                "arn:aws:dynamodb:us-east-1:957592003036:table/PromptsTable",
-                "arn:aws:dynamodb:us-east-1:957592003036:table/ChallengeSessionsTable"
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengesTable",
+                f"arn:aws:dynamodb:{region}:{account}:table/PromptsTable",
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeSessionsTable"
             ]
         ))
         self.ec2_llm_platform_security_role.add_to_policy(iam.PolicyStatement(
             actions=["sqs:*"],
-            resources=["arn:aws:sqs:us-east-1:957592003036:LLmSecurityPlatformMessageQueue"]
+            resources=[f"arn:aws:sqs:{region}:{account}:LLmSecurityPlatformMessageQueue"]
         ))
         # Add SSM parameter access for Hugging Face token
         self.ec2_llm_platform_security_role.add_to_policy(self.ssm_hf_token_policy)
@@ -50,7 +54,7 @@ class IAMConstruct(Construct):
         )
         self.create_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:PutItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/ChallengesTable"]
         ))
         self.create_challenge_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
         self.start_challenge_lambda_role = iam.Role(
@@ -63,11 +67,11 @@ class IAMConstruct(Construct):
         )
         self.start_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:GetItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/ChallengesTable"]
         ))
         self.start_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:PutItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengeSessionsTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/ChallengeSessionsTable"]
         ))
         self.start_challenge_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
         self.delete_challenge_lambda_role = iam.Role(
@@ -80,7 +84,7 @@ class IAMConstruct(Construct):
         )
         self.delete_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:DeleteItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/ChallengesTable"]
         ))
         self.delete_challenge_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
         self.get_owner_challenge_lambda_role = iam.Role(
@@ -93,7 +97,7 @@ class IAMConstruct(Construct):
         )
         self.get_owner_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:GetItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/ChallengesTable"]
         ))
         self.get_owner_challenge_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
         self.get_challenge_lambda_role = iam.Role(
@@ -106,7 +110,7 @@ class IAMConstruct(Construct):
         )
         self.get_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:GetItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/ChallengesTable"]
         ))
         self.get_challenge_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
         self.list_owner_challenges_lambda_role = iam.Role(
@@ -119,7 +123,7 @@ class IAMConstruct(Construct):
         )
         self.list_owner_challenges_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:Scan"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/ChallengesTable"]
         ))
         self.list_owner_challenges_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
         self.list_user_successful_challenges_lambda_role = iam.Role(
@@ -133,8 +137,8 @@ class IAMConstruct(Construct):
         self.list_user_successful_challenges_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:Query"],
             resources=[
-                "arn:aws:dynamodb:us-east-1:957592003036:table/ChallengeSessionsTable",
-                "arn:aws:dynamodb:us-east-1:957592003036:table/ChallengeSessionsTable/index/UserIdIndex"
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeSessionsTable",
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeSessionsTable/index/UserIdIndex"
             ]
         ))
         self.list_user_successful_challenges_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
@@ -148,7 +152,7 @@ class IAMConstruct(Construct):
         )
         self.list_challenges_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:Scan"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/ChallengesTable"]
         ))
         self.list_challenges_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
         self.poll_for_responses_lambda_role = iam.Role(
@@ -161,7 +165,7 @@ class IAMConstruct(Construct):
         )
         self.poll_for_responses_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:Query", "dynamodb:UpdateItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/PromptsTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/PromptsTable"]
         ))
         self.poll_for_responses_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
         self.send_message_to_queue_lambda_role = iam.Role(
@@ -174,15 +178,15 @@ class IAMConstruct(Construct):
         )
         self.send_message_to_queue_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:GetItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengeSessionsTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/ChallengeSessionsTable"]
         ))
         self.send_message_to_queue_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:PutItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/PromptsTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/PromptsTable"]
         ))
         self.send_message_to_queue_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["sqs:SendMessage"],
-            resources=["arn:aws:sqs:us-east-1:957592003036:LLmSecurityPlatformMessageQueue"]
+            resources=[f"arn:aws:sqs:{region}:{account}:LLmSecurityPlatformMessageQueue"]
         ))
         self.send_message_to_queue_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
         self.update_challenge_lambda_role = iam.Role(
@@ -195,7 +199,7 @@ class IAMConstruct(Construct):
         )
         self.update_challenge_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:UpdateItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/ChallengesTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/ChallengesTable"]
         ))
         self.update_challenge_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
 
@@ -210,7 +214,7 @@ class IAMConstruct(Construct):
         )
         self.register_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:PutItem", "dynamodb:GetItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/UsersTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/UsersTable"]
         ))
         self.register_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
 
@@ -225,6 +229,6 @@ class IAMConstruct(Construct):
         )
         self.login_lambda_role.add_to_policy(iam.PolicyStatement(
             actions=["dynamodb:GetItem"],
-            resources=["arn:aws:dynamodb:us-east-1:957592003036:table/UsersTable"]
+            resources=[f"arn:aws:dynamodb:{region}:{account}:table/UsersTable"]
         ))
         self.login_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
