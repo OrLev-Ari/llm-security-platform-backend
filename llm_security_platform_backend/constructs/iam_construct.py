@@ -43,6 +43,12 @@ class IAMConstruct(Construct):
         # Add SSM parameter access for Hugging Face token
         self.ec2_llm_platform_security_role.add_to_policy(self.ssm_hf_token_policy)
 
+        # Create an instance profile for EC2 to use the role
+        iam.CfnInstanceProfile(
+            self, "EC2InstanceProfile",
+            roles=[self.ec2_llm_platform_security_role.role_name],
+            instance_profile_name="EC2LLMPlatformSecurityInstanceProfile"
+        )
         # Lambda execution roles for each Lambda function
         self.create_challenge_lambda_role = iam.Role(
             self, "CreateChallengeLambdaRole",
