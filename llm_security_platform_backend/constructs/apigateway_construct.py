@@ -121,14 +121,20 @@ class ApiGatewayConstruct(Construct):
         leaderboards_challenges_resource.add_resource("{id}").add_method(
             "GET",
             apigateway.LambdaIntegration(lambda_functions["get_challenge_leaderboard_lambda"]),
-            authorization_type=apigateway.AuthorizationType.NONE
+            authorization_type=apigateway.AuthorizationType.NONE,
+            request_parameters={
+                "method.request.querystring.limit": False
+            }
         )
         
         # /leaderboards/global
         leaderboards_resource.add_resource("global").add_method(
             "GET",
             apigateway.LambdaIntegration(lambda_functions["get_global_leaderboard_lambda"]),
-            authorization_type=apigateway.AuthorizationType.NONE
+            authorization_type=apigateway.AuthorizationType.NONE,
+            request_parameters={
+                "method.request.querystring.limit": False
+            }
         )
         
         # /leaderboards/users
@@ -136,12 +142,8 @@ class ApiGatewayConstruct(Construct):
         leaderboards_users_resource.add_method(
             "GET",
             apigateway.LambdaIntegration(lambda_functions["get_user_scores_lambda"]),
-            authorization_type=apigateway.AuthorizationType.NONE
-        )
-        
-        # /leaderboards/users/{id}
-        leaderboards_users_resource.add_resource("{id}").add_method(
-            "GET",
-            apigateway.LambdaIntegration(lambda_functions["get_user_scores_lambda"]),
-            authorization_type=apigateway.AuthorizationType.NONE
+            authorization_type=apigateway.AuthorizationType.NONE,
+            request_parameters={
+                "method.request.querystring.limit": False
+            }
         )

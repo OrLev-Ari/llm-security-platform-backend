@@ -32,30 +32,15 @@ def lambda_handler(event, context):
         }
     
     try:
-        # Extract user_id from path parameters (optional, defaults to authenticated user)
-        path_params = event.get("pathParameters") or {}
-        requested_user_id = path_params.get("id")
-        
-        # If no user_id provided, use authenticated user's username
-        if not requested_user_id:
-            requested_user_id = username
-        
-        # Authorization: users can only view their own scores unless admin
-        if requested_user_id != username and not is_admin:
-            logger.warning(f"User {username} attempted to access scores for {requested_user_id}")
-            return {
-                "statusCode": 403,
-                "body": json.dumps({"error": "Forbidden: You can only view your own scores"})
-            }
-        
+            
         # Extract optional limit from query parameters
         query_params = event.get("queryStringParameters") or {}
         limit = query_params.get("limit")
         
-        logger.info(f"Fetching scores for user: {requested_user_id}, limit: {limit}")
+        logger.info(f"Fetching scores for user: {username}, limit: {limit}")
         
         # Get global total score from GlobalScoresTable
-        global_score_resp = global_scores_table.get_item(Key={"user_id": requested_user_id})
+        global_score_resp = global_scores_table.get_item(Key={"user_id": username})
         global_item = global_score_resp.get("Item")
         
         total_score = global_item.get("total_score", 0) if global_item else 0
@@ -63,7 +48,7 @@ def lambda_handler(event, context):
         
         # Query ChallengeScoresTable with user_id as PK
         query_params_ddb = {
-            "KeyConditionExpression": Key("user_id").eq(requested_user_id)
+            "KeyConditionExpression": Key("user_id").eq(username)
         }
         
         # Apply limit if provided
@@ -79,7 +64,7 @@ def lambda_handler(event, context):
         response = challenge_scores_table.query(**query_params_ddb)
         items = response.get("Items", [])
         
-        logger.info(f"Retrieved {len(items)} scores for user {requested_user_id}")
+        logger.info(f"Retrieved {len(items)} scores for user {username}")
         
         # Build scores list
         scores = []

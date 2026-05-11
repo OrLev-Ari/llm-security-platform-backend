@@ -269,10 +269,9 @@ class IAMConstruct(Construct):
             ]
         )
         self.get_global_leaderboard_lambda_role.add_to_policy(iam.PolicyStatement(
-            actions=["dynamodb:Query"],
+            actions=["dynamodb:Scan"],
             resources=[
-                f"arn:aws:dynamodb:{region}:{account}:table/GlobalScoresTable",
-                f"arn:aws:dynamodb:{region}:{account}:table/GlobalScoresTable/index/GlobalLeaderboardIndex"
+                f"arn:aws:dynamodb:{region}:{account}:table/GlobalScoresTable"
             ]
         ))
         self.get_global_leaderboard_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)

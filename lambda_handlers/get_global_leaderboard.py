@@ -36,31 +36,29 @@ def lambda_handler(event, context):
         
         logger.info(f"Fetching global leaderboard, limit: {limit}")
         
-        # Query GSI "GlobalLeaderboardIndex" with fixed PK "GLOBAL", sorted by total_score descending
-        query_params_ddb = {
-            "IndexName": "GlobalLeaderboardIndex",
-            "KeyConditionExpression": Key("leaderboard_type").eq("GLOBAL"),
-            "ScanIndexForward": False  # Descending order by total_score
-        }
+        # Scan the GlobalScoresTable to get all users
+        response = global_scores_table.scan()
+        items = response.get("Items", [])
+        
+        logger.info(f"Retrieved {len(items)} users for global leaderboard")
+        
+        # Sort by total_score descending in Python
+        sorted_items = sorted(items, key=lambda x: x.get("total_score", 0), reverse=True)
         
         # Apply limit if provided
         if limit:
             try:
-                query_params_ddb["Limit"] = int(limit)
+                limit_int = int(limit)
+                sorted_items = sorted_items[:limit_int]
             except ValueError:
                 return {
                     "statusCode": 400,
                     "body": json.dumps({"error": "limit must be a valid integer"})
                 }
         
-        response = global_scores_table.query(**query_params_ddb)
-        items = response.get("Items", [])
-        
-        logger.info(f"Retrieved {len(items)} users for global leaderboard")
-        
         # Build leaderboard with ranks
         leaderboard = []
-        for rank, item in enumerate(items, start=1):
+        for rank, item in enumerate(sorted_items, start=1):
             leaderboard.append({
                 "rank": rank,
                 "user_id": item["user_id"],
