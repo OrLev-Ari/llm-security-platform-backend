@@ -110,3 +110,38 @@ class ApiGatewayConstruct(Construct):
             apigateway.LambdaIntegration(lambda_functions["send_message_to_queue_lambda"]),
             authorization_type=apigateway.AuthorizationType.NONE
         )
+
+        # /leaderboards
+        leaderboards_resource = self.api.root.add_resource("leaderboards")
+        
+        # /leaderboards/challenges
+        leaderboards_challenges_resource = leaderboards_resource.add_resource("challenges")
+        
+        # /leaderboards/challenges/{id}
+        leaderboards_challenges_resource.add_resource("{id}").add_method(
+            "GET",
+            apigateway.LambdaIntegration(lambda_functions["get_challenge_leaderboard_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
+        )
+        
+        # /leaderboards/global
+        leaderboards_resource.add_resource("global").add_method(
+            "GET",
+            apigateway.LambdaIntegration(lambda_functions["get_global_leaderboard_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
+        )
+        
+        # /leaderboards/users
+        leaderboards_users_resource = leaderboards_resource.add_resource("users")
+        leaderboards_users_resource.add_method(
+            "GET",
+            apigateway.LambdaIntegration(lambda_functions["get_user_scores_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
+        )
+        
+        # /leaderboards/users/{id}
+        leaderboards_users_resource.add_resource("{id}").add_method(
+            "GET",
+            apigateway.LambdaIntegration(lambda_functions["get_user_scores_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
+        )
