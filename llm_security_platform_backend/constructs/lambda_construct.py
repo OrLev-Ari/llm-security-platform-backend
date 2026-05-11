@@ -249,3 +249,55 @@ class LambdaConstruct(Construct):
             architecture=_lambda.Architecture.ARM_64,
             layers=[self.auth_layer]
         )
+
+        # GetChallengeLeaderboardLambdaFunction
+        self.get_challenge_leaderboard_lambda = _lambda.Function(
+            self, "GetChallengeLeaderboardLambdaFunction",
+            function_name="GetChallengeLeaderboardLambdaFunction",
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="get_challenge_leaderboard.lambda_handler",
+            code=_lambda.Code.from_asset("lambda_handlers"),
+            environment={
+                "CHALLENGE_SCORES_TABLE": dynamodb_tables["challenge_scores_table"].table_name
+            },
+            role=iam_roles["get_challenge_leaderboard_lambda_role"],
+            memory_size=128,
+            timeout=Duration.seconds(15),
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
+        )
+
+        # GetGlobalLeaderboardLambdaFunction
+        self.get_global_leaderboard_lambda = _lambda.Function(
+            self, "GetGlobalLeaderboardLambdaFunction",
+            function_name="GetGlobalLeaderboardLambdaFunction",
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="get_global_leaderboard.lambda_handler",
+            code=_lambda.Code.from_asset("lambda_handlers"),
+            environment={
+                "GLOBAL_SCORES_TABLE": dynamodb_tables["global_scores_table"].table_name
+            },
+            role=iam_roles["get_global_leaderboard_lambda_role"],
+            memory_size=128,
+            timeout=Duration.seconds(15),
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
+        )
+
+        # GetUserScoresLambdaFunction
+        self.get_user_scores_lambda = _lambda.Function(
+            self, "GetUserScoresLambdaFunction",
+            function_name="GetUserScoresLambdaFunction",
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="get_user_scores.lambda_handler",
+            code=_lambda.Code.from_asset("lambda_handlers"),
+            environment={
+                "CHALLENGE_SCORES_TABLE": dynamodb_tables["challenge_scores_table"].table_name,
+                "GLOBAL_SCORES_TABLE": dynamodb_tables["global_scores_table"].table_name
+            },
+            role=iam_roles["get_user_scores_lambda_role"],
+            memory_size=128,
+            timeout=Duration.seconds(15),
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
+        )

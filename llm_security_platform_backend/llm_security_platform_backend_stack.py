@@ -27,7 +27,9 @@ class LlmSecurityPlatformBackendStack(Stack):
                 "challenge_sessions_table": dynamodb_construct.challenge_sessions_table,
                 "prompts_table": dynamodb_construct.prompts_table,
                 "challenges_table": dynamodb_construct.challenges_table,
-                "users_table": dynamodb_construct.users_table
+                "users_table": dynamodb_construct.users_table,
+                "challenge_scores_table": dynamodb_construct.challenge_scores_table,
+                "global_scores_table": dynamodb_construct.global_scores_table
             },
             iam_roles={
                 "create_challenge_lambda_role": iam_construct.create_challenge_lambda_role,
@@ -42,7 +44,10 @@ class LlmSecurityPlatformBackendStack(Stack):
                 "send_message_to_queue_lambda_role": iam_construct.send_message_to_queue_lambda_role,
                 "update_challenge_lambda_role": iam_construct.update_challenge_lambda_role,
                 "register_lambda_role": iam_construct.register_lambda_role,
-                "login_lambda_role": iam_construct.login_lambda_role
+                "login_lambda_role": iam_construct.login_lambda_role,
+                "get_challenge_leaderboard_lambda_role": iam_construct.get_challenge_leaderboard_lambda_role,
+                "get_global_leaderboard_lambda_role": iam_construct.get_global_leaderboard_lambda_role,
+                "get_user_scores_lambda_role": iam_construct.get_user_scores_lambda_role
             }
         )
 
@@ -63,6 +68,9 @@ class LlmSecurityPlatformBackendStack(Stack):
                 "send_message_to_queue_lambda": lambda_construct.send_message_to_queue_lambda,
                 "update_challenge_lambda": lambda_construct.update_challenge_lambda,
                 "register_lambda": lambda_construct.register_lambda,
-                "login_lambda": lambda_construct.login_lambda
+                "login_lambda": lambda_construct.login_lambda,
+                "get_challenge_leaderboard_lambda": lambda_construct.get_challenge_leaderboard_lambda,
+                "get_global_leaderboard_lambda": lambda_construct.get_global_leaderboard_lambda,
+                "get_user_scores_lambda": lambda_construct.get_user_scores_lambda
             }
         )

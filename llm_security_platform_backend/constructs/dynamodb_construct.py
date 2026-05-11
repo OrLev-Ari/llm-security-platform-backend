@@ -45,3 +45,28 @@ class DynamoDBConstruct(Construct):
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             table_name="UsersTable"
         )
+
+        # ChallengeScoresTable - stores best score per user per challenge
+        self.challenge_scores_table = dynamodb.Table(
+            self, "ChallengeScoresTable",
+            partition_key=dynamodb.Attribute(name="user_id", type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(name="challenge_id", type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            table_name="ChallengeScoresTable"
+        )
+        # GSI for per-challenge leaderboards (query all users for a specific challenge, sort by score in Lambda)
+        self.challenge_scores_table.add_global_secondary_index(
+            index_name="ChallengeLeaderboardIndex",
+            partition_key=dynamodb.Attribute(name="challenge_id", type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(name="user_id", type=dynamodb.AttributeType.STRING),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
+
+        # GlobalScoresTable - stores total score per user across all challenges
+        self.global_scores_table = dynamodb.Table(
+            self, "GlobalScoresTable",
+            partition_key=dynamodb.Attribute(name="user_id", type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            table_name="GlobalScoresTable"
+        )
+

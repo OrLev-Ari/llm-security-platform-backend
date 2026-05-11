@@ -33,7 +33,9 @@ class IAMConstruct(Construct):
             resources=[
                 f"arn:aws:dynamodb:{region}:{account}:table/ChallengesTable",
                 f"arn:aws:dynamodb:{region}:{account}:table/PromptsTable",
-                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeSessionsTable"
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeSessionsTable",
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeScoresTable",
+                f"arn:aws:dynamodb:{region}:{account}:table/GlobalScoresTable"
             ]
         ))
         self.ec2_llm_platform_security_role.add_to_policy(iam.PolicyStatement(
@@ -238,3 +240,56 @@ class IAMConstruct(Construct):
             resources=[f"arn:aws:dynamodb:{region}:{account}:table/UsersTable"]
         ))
         self.login_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
+
+        # GetChallengeLeaderboard Lambda Role
+        self.get_challenge_leaderboard_lambda_role = iam.Role(
+            self, "GetChallengeLeaderboardLambdaRole",
+            role_name="GetChallengeLeaderboardLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.get_challenge_leaderboard_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:Query"],
+            resources=[
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeScoresTable",
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeScoresTable/index/ChallengeLeaderboardIndex"
+            ]
+        ))
+        self.get_challenge_leaderboard_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
+
+        # GetGlobalLeaderboard Lambda Role
+        self.get_global_leaderboard_lambda_role = iam.Role(
+            self, "GetGlobalLeaderboardLambdaRole",
+            role_name="GetGlobalLeaderboardLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.get_global_leaderboard_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:Scan"],
+            resources=[
+                f"arn:aws:dynamodb:{region}:{account}:table/GlobalScoresTable"
+            ]
+        ))
+        self.get_global_leaderboard_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
+
+        # GetUserScores Lambda Role
+        self.get_user_scores_lambda_role = iam.Role(
+            self, "GetUserScoresLambdaRole",
+            role_name="GetUserScoresLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.get_user_scores_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:Query", "dynamodb:GetItem"],
+            resources=[
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeScoresTable",
+                f"arn:aws:dynamodb:{region}:{account}:table/GlobalScoresTable"
+            ]
+        ))
+        self.get_user_scores_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
