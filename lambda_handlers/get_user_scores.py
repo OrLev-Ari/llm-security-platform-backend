@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 import logging
+from decimal import Decimal
 from boto3.dynamodb.conditions import Key
 from auth_utils import get_jwt_secret, extract_token_from_event, validate_jwt
 
@@ -14,6 +15,12 @@ global_scores_table = dynamo.Table(GLOBAL_SCORES_TABLE)
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+def convert_decimal(obj):
+    """Convert Decimal objects to int or float for JSON serialization."""
+    if isinstance(obj, Decimal):
+        return int(obj) if obj % 1 == 0 else float(obj)
+    return obj
 
 def lambda_handler(event, context):
     logger.info("Get user scores request received")
@@ -43,8 +50,8 @@ def lambda_handler(event, context):
         global_score_resp = global_scores_table.get_item(Key={"user_id": username})
         global_item = global_score_resp.get("Item")
         
-        total_score = global_item.get("total_score", 0) if global_item else 0
-        challenges_completed = global_item.get("challenges_completed", 0) if global_item else 0
+        total_score = convert_decimal(global_item.get("total_score", 0)) if global_item else 0
+        challenges_completed = convert_decimal(global_item.get("challenges_completed", 0)) if global_item else 0
         
         # Query ChallengeScoresTable with user_id as PK
         query_params_ddb = {
@@ -71,9 +78,9 @@ def lambda_handler(event, context):
         for item in items:
             scores.append({
                 "challenge_id": item["challenge_id"],
-                "score": item["score"],
-                "prompt_count": item["prompt_count"],
-                "time_seconds": item["time_seconds"],
+                "score": convert_decimal(item["score"]),
+                "prompt_count": convert_decimal(item["prompt_count"]),
+                "time_seconds": convert_decimal(item["time_seconds"]),
                 "completed_at": item["completed_at"]
             })
         

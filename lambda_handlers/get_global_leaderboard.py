@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 import logging
+from decimal import Decimal
 from boto3.dynamodb.conditions import Key
 from auth_utils import get_jwt_secret, extract_token_from_event, validate_jwt
 
@@ -12,6 +13,12 @@ global_scores_table = dynamo.Table(GLOBAL_SCORES_TABLE)
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+def convert_decimal(obj):
+    """Convert Decimal objects to int or float for JSON serialization."""
+    if isinstance(obj, Decimal):
+        return int(obj) if obj % 1 == 0 else float(obj)
+    return obj
 
 def lambda_handler(event, context):
     logger.info("Get global leaderboard request received")
@@ -62,8 +69,8 @@ def lambda_handler(event, context):
             leaderboard.append({
                 "rank": rank,
                 "user_id": item["user_id"],
-                "total_score": item["total_score"],
-                "challenges_completed": item["challenges_completed"],
+                "total_score": convert_decimal(item["total_score"]),
+                "challenges_completed": convert_decimal(item["challenges_completed"]),
                 "last_updated": item["last_updated"]
             })
         

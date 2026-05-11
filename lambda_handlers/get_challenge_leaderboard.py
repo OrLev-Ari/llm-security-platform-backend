@@ -3,6 +3,7 @@ import boto3
 import os
 import logging
 import base64
+from decimal import Decimal
 from boto3.dynamodb.conditions import Key
 from auth_utils import get_jwt_secret, extract_token_from_event, validate_jwt
 
@@ -13,6 +14,12 @@ challenge_scores_table = dynamo.Table(CHALLENGE_SCORES_TABLE)
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+def convert_decimal(obj):
+    """Convert Decimal objects to int or float for JSON serialization."""
+    if isinstance(obj, Decimal):
+        return int(obj) if obj % 1 == 0 else float(obj)
+    return obj
 
 def lambda_handler(event, context):
     logger.info("Get challenge leaderboard request received")
@@ -76,9 +83,9 @@ def lambda_handler(event, context):
             leaderboard.append({
                 "rank": rank,
                 "user_id": item["user_id"],
-                "score": item["score"],
-                "prompt_count": item["prompt_count"],
-                "time_seconds": item["time_seconds"],
+                "score": convert_decimal(item["score"]),
+                "prompt_count": convert_decimal(item["prompt_count"]),
+                "time_seconds": convert_decimal(item["time_seconds"]),
                 "completed_at": item["completed_at"]
             })
         
