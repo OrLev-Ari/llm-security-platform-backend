@@ -23,18 +23,18 @@ def convert_decimal(obj):
 def lambda_handler(event, context):
     logger.info("Get global leaderboard request received")
     
-    # Authenticate user
-    try:
-        jwt_secret = get_jwt_secret()
-        token = extract_token_from_event(event)
-        username, is_admin = validate_jwt(token, jwt_secret)
-        logger.info(f"Authenticated user: {username}")
-    except Exception as e:
-        logger.warning(f"Authentication failed: {str(e)}")
-        return {
-            "statusCode": 401,
-            "body": json.dumps({"error": str(e)})
-        }
+    # Authenticate user, skip for now to allow public access to global leaderboard
+    # try:
+    #     jwt_secret = get_jwt_secret()
+    #     token = extract_token_from_event(event)
+    #     username, is_admin = validate_jwt(token, jwt_secret)
+    #     logger.info(f"Authenticated user: {username}")
+    # except Exception as e:
+    #     logger.warning(f"Authentication failed: {str(e)}")
+    #     return {
+    #         "statusCode": 401,
+    #         "body": json.dumps({"error": str(e)})
+    #     }
     
     try:
         # Extract optional limit from query parameters
