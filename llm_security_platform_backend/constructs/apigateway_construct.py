@@ -64,6 +64,28 @@ class ApiGatewayConstruct(Construct):
             authorization_type=apigateway.AuthorizationType.NONE
         )
 
+        # /admin/challenges/completedsessions
+        admin_completed_sessions_resource = admin_challenges_resource.add_resource("completedsessions")
+        
+        # /admin/challenges/completedsessions/{challenge_id}
+        admin_completed_sessions_challenge_resource = admin_completed_sessions_resource.add_resource("{challenge_id}")
+        admin_completed_sessions_challenge_resource.add_method(
+            "GET",
+            apigateway.LambdaIntegration(lambda_functions["list_completed_sessions_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE,
+            request_parameters={
+                "method.request.querystring.limit": False
+            }
+        )
+        
+        # /admin/challenges/completedsessions/{challenge_id}/{session_id}
+        admin_completed_sessions_session_resource = admin_completed_sessions_challenge_resource.add_resource("{session_id}")
+        admin_completed_sessions_session_resource.add_method(
+            "GET",
+            apigateway.LambdaIntegration(lambda_functions["get_session_chat_history_lambda"]),
+            authorization_type=apigateway.AuthorizationType.NONE
+        )
+
         # /challenges
         challenges_resource = self.api.root.add_resource("challenges")
         challenges_resource.add_method(

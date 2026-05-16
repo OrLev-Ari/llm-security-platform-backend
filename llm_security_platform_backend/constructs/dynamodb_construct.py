@@ -18,6 +18,12 @@ class DynamoDBConstruct(Construct):
             sort_key=dynamodb.Attribute(name="started_at", type=dynamodb.AttributeType.STRING),
             projection_type=dynamodb.ProjectionType.ALL
         )
+        self.challenge_sessions_table.add_global_secondary_index(
+            index_name="ChallengeStatusIndex",
+            partition_key=dynamodb.Attribute(name="challenge_id", type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(name="completed_at", type=dynamodb.AttributeType.STRING),
+            projection_type=dynamodb.ProjectionType.ALL
+        )
 
         # PromptsTable
         self.prompts_table = dynamodb.Table(

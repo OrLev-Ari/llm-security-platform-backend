@@ -301,3 +301,41 @@ class LambdaConstruct(Construct):
             architecture=_lambda.Architecture.ARM_64,
             layers=[self.auth_layer]
         )
+
+        # ListCompletedSessionsLambdaFunction
+        self.list_completed_sessions_lambda = _lambda.Function(
+            self, "ListCompletedSessionsLambdaFunction",
+            function_name="ListCompletedSessionsLambdaFunction",
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="list_completed_sessions.lambda_handler",
+            code=_lambda.Code.from_asset("lambda_handlers"),
+            environment={
+                "CHALLENGE_SESSIONS_TABLE": dynamodb_tables["challenge_sessions_table"].table_name,
+                "CHALLENGE_SCORES_TABLE": dynamodb_tables["challenge_scores_table"].table_name,
+                "JWT_SECRET_PARAM": "/llmplatformsecurity/jwtsecret"
+            },
+            role=iam_roles["list_completed_sessions_lambda_role"],
+            memory_size=128,
+            timeout=Duration.seconds(15),
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
+        )
+
+        # GetSessionChatHistoryLambdaFunction
+        self.get_session_chat_history_lambda = _lambda.Function(
+            self, "GetSessionChatHistoryLambdaFunction",
+            function_name="GetSessionChatHistoryLambdaFunction",
+            runtime=_lambda.Runtime.PYTHON_3_12,
+            handler="get_session_chat_history.lambda_handler",
+            code=_lambda.Code.from_asset("lambda_handlers"),
+            environment={
+                "CHALLENGE_SESSIONS_TABLE": dynamodb_tables["challenge_sessions_table"].table_name,
+                "PROMPTS_TABLE": dynamodb_tables["prompts_table"].table_name,
+                "JWT_SECRET_PARAM": "/llmplatformsecurity/jwtsecret"
+            },
+            role=iam_roles["get_session_chat_history_lambda_role"],
+            memory_size=128,
+            timeout=Duration.seconds(15),
+            architecture=_lambda.Architecture.ARM_64,
+            layers=[self.auth_layer]
+        )

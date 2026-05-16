@@ -293,3 +293,40 @@ class IAMConstruct(Construct):
             ]
         ))
         self.get_user_scores_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
+
+        # ListCompletedSessions Lambda Role
+        self.list_completed_sessions_lambda_role = iam.Role(
+            self, "ListCompletedSessionsLambdaRole",
+            role_name="ListCompletedSessionsLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.list_completed_sessions_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:Query", "dynamodb:GetItem"],
+            resources=[
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeSessionsTable",
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeSessionsTable/index/ChallengeStatusIndex",
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeScoresTable"
+            ]
+        ))
+        self.list_completed_sessions_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)
+
+        # GetSessionChatHistory Lambda Role
+        self.get_session_chat_history_lambda_role = iam.Role(
+            self, "GetSessionChatHistoryLambdaRole",
+            role_name="GetSessionChatHistoryLambdaRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole")
+            ]
+        )
+        self.get_session_chat_history_lambda_role.add_to_policy(iam.PolicyStatement(
+            actions=["dynamodb:Query", "dynamodb:GetItem"],
+            resources=[
+                f"arn:aws:dynamodb:{region}:{account}:table/PromptsTable",
+                f"arn:aws:dynamodb:{region}:{account}:table/ChallengeSessionsTable"
+            ]
+        ))
+        self.get_session_chat_history_lambda_role.add_to_policy(self.ssm_jwt_secret_policy)

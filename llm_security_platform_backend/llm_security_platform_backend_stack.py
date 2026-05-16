@@ -47,7 +47,9 @@ class LlmSecurityPlatformBackendStack(Stack):
                 "login_lambda_role": iam_construct.login_lambda_role,
                 "get_challenge_leaderboard_lambda_role": iam_construct.get_challenge_leaderboard_lambda_role,
                 "get_global_leaderboard_lambda_role": iam_construct.get_global_leaderboard_lambda_role,
-                "get_user_scores_lambda_role": iam_construct.get_user_scores_lambda_role
+                "get_user_scores_lambda_role": iam_construct.get_user_scores_lambda_role,
+                "list_completed_sessions_lambda_role": iam_construct.list_completed_sessions_lambda_role,
+                "get_session_chat_history_lambda_role": iam_construct.get_session_chat_history_lambda_role
             }
         )
 
@@ -71,6 +73,8 @@ class LlmSecurityPlatformBackendStack(Stack):
                 "login_lambda": lambda_construct.login_lambda,
                 "get_challenge_leaderboard_lambda": lambda_construct.get_challenge_leaderboard_lambda,
                 "get_global_leaderboard_lambda": lambda_construct.get_global_leaderboard_lambda,
-                "get_user_scores_lambda": lambda_construct.get_user_scores_lambda
+                "get_user_scores_lambda": lambda_construct.get_user_scores_lambda,
+                "list_completed_sessions_lambda": lambda_construct.list_completed_sessions_lambda,
+                "get_session_chat_history_lambda": lambda_construct.get_session_chat_history_lambda
             }
         )
